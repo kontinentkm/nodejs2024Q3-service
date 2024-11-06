@@ -1,18 +1,43 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
-describe('UserService', () => {
-  let service: UserService;
+@Injectable()
+export class UserService {
+  private users = [];
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService],
-    }).compile();
+  getAllUsers() {
+    return this.users;
+  }
 
-    service = module.get<UserService>(UserService);
-  });
+  getUserById(id: string) {
+    return this.users.find((user) => user.id === id);
+  }
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
+  createUser(createUserDto: CreateUserDto) {
+    const newUser = {
+      id: 'some-uuid',
+      ...createUserDto,
+      version: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    this.users.push(newUser);
+    return newUser;
+  }
+
+  updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
+    const user = this.users.find((user) => user.id === id);
+    if (user) {
+      user.password = updatePasswordDto.newPassword;
+      user.version += 1;
+      user.updatedAt = Date.now();
+      return user;
+    }
+    return null;
+  }
+
+  deleteUser(id: string) {
+    this.users = this.users.filter((user) => user.id !== id);
+  }
+}
