@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { Artist } from './interfaces/artist.interface';
+import { v4 as uuidv4 } from 'uuid'; // Импорт функции uuidv4 для генерации UUID
 
 @Injectable()
 export class ArtistService {
@@ -16,7 +17,7 @@ export class ArtistService {
 
   createArtist(createArtistDto: CreateArtistDto): Artist {
     const newArtist: Artist = {
-      id: 'some-uuid',
+      id: uuidv4(), // Генерация уникального UUID
       name: createArtistDto.name,
       grammy: createArtistDto.grammy,
     };

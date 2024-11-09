@@ -1,25 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
+import { Track } from './interfaces/track.interface';
+import { v4 as uuidv4 } from 'uuid'; // Импорт функции uuidv4 для генерации UUID
 
 @Injectable()
 export class TrackService {
-  private tracks = [];
+  private tracks: Track[] = [];
 
-  getAllTracks() {
+  getAllTracks(): Track[] {
     return this.tracks;
   }
 
-  getTrackById(id: string) {
+  getTrackById(id: string): Track | undefined {
     return this.tracks.find((track) => track.id === id);
   }
 
-  createTrack(createTrackDto: CreateTrackDto) {
-    const newTrack = { id: 'some-uuid', ...createTrackDto };
+  createTrack(createTrackDto: CreateTrackDto): Track {
+    const newTrack: Track = {
+      id: uuidv4(), // Генерация уникального UUID
+      name: createTrackDto.name,
+      artistId: createTrackDto.artistId,
+      albumId: createTrackDto.albumId ?? null,
+      duration: createTrackDto.duration,
+    };
     this.tracks.push(newTrack);
     return newTrack;
   }
 
-  updateTrack(id: string, updateTrackDto: CreateTrackDto) {
+  updateTrack(
+    id: string,
+    updateTrackDto: Partial<CreateTrackDto>,
+  ): Track | null {
     const track = this.tracks.find((track) => track.id === id);
     if (track) {
       Object.assign(track, updateTrackDto);
@@ -28,7 +39,7 @@ export class TrackService {
     return null;
   }
 
-  deleteTrack(id: string) {
+  deleteTrack(id: string): void {
     this.tracks = this.tracks.filter((track) => track.id !== id);
   }
 }
