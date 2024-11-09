@@ -1,13 +1,15 @@
-// src/user/user.service.ts
 import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './interfaces/user.interface';
 import { v4 as uuidv4 } from 'uuid';
+import { validate } from 'uuid';
+import { Exclude } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -18,12 +20,20 @@ export class UserService {
   }
 
   getUserById(id: string): User {
+    if (!validate(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
     const user = this.users.find((user) => user.id === id);
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
   createUser(createUserDto: CreateUserDto): User {
+    if (!createUserDto.login || !createUserDto.password) {
+      throw new BadRequestException('Missing required data');
+    }
+
     const newUser: User = {
       id: uuidv4(),
       login: createUserDto.login,
@@ -37,6 +47,10 @@ export class UserService {
   }
 
   updatePassword(id: string, updatePasswordDto: UpdatePasswordDto): User {
+    if (!validate(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
     const user = this.getUserById(id);
 
     if (user.password !== updatePasswordDto.oldPassword) {
@@ -51,8 +65,14 @@ export class UserService {
   }
 
   deleteUser(id: string): void {
+    if (!validate(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
     const index = this.users.findIndex((user) => user.id === id);
     if (index === -1) throw new NotFoundException('User not found');
     this.users.splice(index, 1);
+    // возвращаем 204 No Content
+    return;
   }
 }
