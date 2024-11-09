@@ -6,12 +6,13 @@ import {
   Delete,
   Param,
   Body,
+  HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
-@Controller('users')
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -39,7 +40,8 @@ export class UserController {
   }
 
   @Delete(':id')
-  deleteUser(@Param('id') id: string) {
+  @HttpCode(204) // Устанавливает статус код 204 для успешного удаления
+  async delete(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }
 }
