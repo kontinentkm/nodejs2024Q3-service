@@ -1,3 +1,4 @@
+// src/user/user.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -6,10 +7,9 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { User } from './interfaces/user.interface';
+import { User } from './entities/user.entity'; // Импортируем класс User
 import { v4 as uuidv4 } from 'uuid';
 import { validate } from 'uuid';
-import { Exclude } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -34,14 +34,15 @@ export class UserService {
       throw new BadRequestException('Missing required data');
     }
 
-    const newUser: User = {
+    const newUser = new User({
       id: uuidv4(),
       login: createUserDto.login,
       password: createUserDto.password,
       version: 1,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-    };
+    });
+
     this.users.push(newUser);
     return newUser;
   }
@@ -72,7 +73,5 @@ export class UserService {
     const index = this.users.findIndex((user) => user.id === id);
     if (index === -1) throw new NotFoundException('User not found');
     this.users.splice(index, 1);
-    // возвращаем 204 No Content
-    return;
   }
 }
