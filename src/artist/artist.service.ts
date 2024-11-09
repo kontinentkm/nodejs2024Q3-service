@@ -9,25 +9,23 @@ import { v4 as uuidv4 } from 'uuid'; // Импорт функции uuidv4 дл�
 
 @Injectable()
 export class ArtistService {
-  findOne(id: string) {
-    throw new Error('Method not implemented.');
-  }
   private artists: Artist[] = [];
 
+  // Получение всех артистов
   getAllArtists(): Artist[] {
     return this.artists;
   }
 
-  // Метод для получения артиста по ID
+  // Получение артиста по ID
   getArtistById(id: string): Artist | void {
     const artist = this.artists.find((artist) => artist.id === id);
     if (!artist) {
-      // Если артист не найден, выбрасываем исключение NotFoundException или возвращаем 204
       throw new NotFoundException('Artist not found');
     }
     return artist;
   }
 
+  // Создание нового артиста
   createArtist(createArtistDto: CreateArtistDto): Artist {
     if (!createArtistDto.name || typeof createArtistDto.grammy !== 'boolean') {
       throw new BadRequestException('Invalid artist data');
@@ -41,6 +39,7 @@ export class ArtistService {
     return newArtist;
   }
 
+  // Обновление данных артиста
   updateArtist(id: string, updateArtistDto: CreateArtistDto): Artist {
     const artist = this.artists.find((artist) => artist.id === id);
     if (!artist) {
@@ -53,13 +52,12 @@ export class ArtistService {
     return artist;
   }
 
-  // Метод удаления артиста
+  // Удаление артиста
   deleteArtist(id: string): void {
     const artistIndex = this.artists.findIndex((artist) => artist.id === id);
     if (artistIndex === -1) {
       throw new NotFoundException('Artist not found');
     }
     this.artists.splice(artistIndex, 1);
-    // Убедитесь, что после удаления артиста никаких данных не осталось
   }
 }

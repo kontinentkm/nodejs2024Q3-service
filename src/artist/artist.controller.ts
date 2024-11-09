@@ -23,11 +23,12 @@ export class ArtistController {
 
   @Get(':id')
   getArtistById(@Param('id') id: string) {
+    if (!id || id.length !== 36) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
     try {
       const artist = this.artistService.getArtistById(id);
-      if (!artist) {
-        return { statusCode: 204 }; // Вернем 204, если артист не найден
-      }
       return artist;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -54,29 +55,35 @@ export class ArtistController {
     @Param('id') id: string,
     @Body() updateArtistDto: CreateArtistDto,
   ) {
-    try {
-      return this.artistService.updateArtist(id, updateArtistDto);
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw new BadRequestException(error.message);
-      }
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
-      }
-      throw error;
+    // Проверка на неправильный формат ID
+    if (!id || id.length !== 36) {
+      // Например, проверка длины UUID
+      throw new BadRequestException('Invalid ID format');
     }
+
+    // Логика обновления художника
+    const updatedArtist = this.artistService.updateArtist(id, updateArtistDto);
+
+    if (!updatedArtist) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    return updatedArtist;
   }
 
   @Delete(':id')
   deleteArtist(@Param('id') id: string) {
-    try {
-      this.artistService.deleteArtist(id);
-      return { statusCode: 204 };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
-      }
-      throw error;
+    // Проверка на неправильный формат ID
+    if (!id || id.length !== 36) {
+      throw new BadRequestException('Invalid ID format');
     }
+
+    // Используем getArtistById для проверки существования артиста
+    this.artistService.getArtistById(id);
+
+    // Удаление артиста
+    this.artistService.deleteArtist(id);
+
+    return { message: 'Artist successfully deleted' };
   }
 }
