@@ -6,6 +6,8 @@ import {
   Delete,
   Param,
   Body,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
@@ -21,12 +23,30 @@ export class ArtistController {
 
   @Get(':id')
   getArtistById(@Param('id') id: string) {
-    return this.artistService.getArtistById(id);
+    try {
+      const artist = this.artistService.getArtistById(id);
+      if (!artist) {
+        return { statusCode: 204 }; // Вернем 204, если артист не найден
+      }
+      return artist;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Post()
   createArtist(@Body() createArtistDto: CreateArtistDto) {
-    return this.artistService.createArtist(createArtistDto);
+    try {
+      return this.artistService.createArtist(createArtistDto);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Put(':id')
@@ -34,11 +54,29 @@ export class ArtistController {
     @Param('id') id: string,
     @Body() updateArtistDto: CreateArtistDto,
   ) {
-    return this.artistService.updateArtist(id, updateArtistDto);
+    try {
+      return this.artistService.updateArtist(id, updateArtistDto);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      }
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Delete(':id')
   deleteArtist(@Param('id') id: string) {
-    return this.artistService.deleteArtist(id);
+    try {
+      this.artistService.deleteArtist(id);
+      return { statusCode: 204 };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 }

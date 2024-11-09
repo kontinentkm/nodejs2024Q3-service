@@ -1,5 +1,12 @@
+import { IsString, IsBoolean, IsUUID } from 'class-validator';
+
 export class CreateArtistDto {
-  id: string; // uuid v4
+  @IsUUID()
+  id: string; // UUID v4
+
+  @IsString()
   name: string;
+
+  @IsBoolean()
   grammy: boolean;
 }
