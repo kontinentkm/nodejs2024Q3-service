@@ -37,7 +37,7 @@ export class TrackController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createTrack(@Body() createTrackDto: CreateTrackDto): Track {
+  async createTrack(@Body() createTrackDto: CreateTrackDto): Promise<Track> {
     return this.trackService.createTrack(createTrackDto);
   }
 
@@ -47,6 +47,10 @@ export class TrackController {
     @Param('id') id: string,
     @Body() updateTrackDto: Partial<CreateTrackDto>,
   ): Track | null {
+    if (!isUUID(id)) {
+      // Проверка, является ли ID валидным UUID
+      throw new BadRequestException('Invalid ID format'); // Возвращаем 400 ошибку
+    }
     const updatedTrack = this.trackService.updateTrack(id, updateTrackDto);
     if (!updatedTrack) throw new NotFoundException();
     return updatedTrack;

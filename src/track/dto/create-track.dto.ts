@@ -1,8 +1,20 @@
 // src\track\dto\creat-track.dto.ts
+import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
+
 export class CreateTrackDto {
-  id: string; // uuid v4
+  @IsString()
+  @IsNotEmpty()
   name: string;
-  artistId: string | null; // refers to Artist
-  albumId: string | null; // refers to Album
-  duration: number; // integer number
+
+  @IsNumber()
+  @IsNotEmpty()
+  duration: number;
+
+  @IsString()
+  @IsNotEmpty()
+  artistId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  albumId: string;
 }
