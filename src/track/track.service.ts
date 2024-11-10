@@ -50,4 +50,11 @@ export class TrackService {
       track.artistId === artistId ? { ...track, artistId: null } : track,
     );
   }
+
+  // метод для установки albumId в null для треков с указанным albumId
+  clearAlbumId(albumId: string): void {
+    this.tracks = this.tracks.map((track) =>
+      track.albumId === albumId ? { ...track, albumId: null } : track,
+    );
+  }
 }

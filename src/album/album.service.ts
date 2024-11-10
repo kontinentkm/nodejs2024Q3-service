@@ -3,10 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { Album } from './interfaces/album.interface';
+import { TrackService } from '../track/track.service'; // Подключите TrackService
 
 @Injectable()
 export class AlbumService {
   private albums: Album[] = [];
+
+  constructor(private readonly trackService: TrackService) {}
 
   getAllAlbums(): Album[] {
     return this.albums;
@@ -37,7 +40,11 @@ export class AlbumService {
   }
 
   deleteAlbum(id: string): void {
+    // Удаляем альбом из списка
     this.albums = this.albums.filter((album) => album.id !== id);
+
+    // Устанавливаем albumId в null для всех треков, связанных с этим альбомом
+    this.trackService.clearAlbumId(id);
   }
 
   // метод для установки artistId на null для всех альбомов артиста

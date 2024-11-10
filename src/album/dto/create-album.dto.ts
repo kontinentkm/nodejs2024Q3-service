@@ -1,6 +1,18 @@
+// src/album/dto/create-album.dto.ts
+import { IsString, IsInt, IsOptional, IsUUID } from 'class-validator';
+
 export class CreateAlbumDto {
-  id: string; // uuid v4
+  @IsOptional()
+  @IsUUID()
+  id: string;
+
+  @IsString()
   name: string;
+
+  @IsInt()
   year: number;
-  artistId: string | null; // refers to Artist
+
+  @IsOptional()
+  @IsUUID()
+  artistId: string | null;
 }
