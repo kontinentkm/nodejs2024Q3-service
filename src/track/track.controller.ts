@@ -1,3 +1,4 @@
+// src\track\track.controller.ts
 import {
   Controller,
   Get,
@@ -6,7 +7,12 @@ import {
   Delete,
   Param,
   Body,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
+import { validate as isUUID } from 'uuid';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { Track } from './interfaces/track.interface';
@@ -21,25 +27,36 @@ export class TrackController {
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   getTrackById(@Param('id') id: string): Track | undefined {
-    return this.trackService.getTrackById(id);
+    if (!isUUID(id)) throw new BadRequestException();
+    const track = this.trackService.getTrackById(id);
+    if (!track) throw new NotFoundException();
+    return track;
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   createTrack(@Body() createTrackDto: CreateTrackDto): Track {
     return this.trackService.createTrack(createTrackDto);
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   updateTrack(
     @Param('id') id: string,
     @Body() updateTrackDto: Partial<CreateTrackDto>,
   ): Track | null {
-    return this.trackService.updateTrack(id, updateTrackDto);
+    const updatedTrack = this.trackService.updateTrack(id, updateTrackDto);
+    if (!updatedTrack) throw new NotFoundException();
+    return updatedTrack;
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   deleteTrack(@Param('id') id: string): void {
-    return this.trackService.deleteTrack(id);
+    const track = this.trackService.getTrackById(id);
+    if (!track) throw new NotFoundException();
+    this.trackService.deleteTrack(id);
   }
 }
