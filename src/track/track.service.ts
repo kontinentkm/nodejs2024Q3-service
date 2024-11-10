@@ -42,4 +42,11 @@ export class TrackService {
   deleteTrack(id: string): void {
     this.tracks = this.tracks.filter((track) => track.id !== id);
   }
+
+  // метод для установки artistId на null для всех треков артиста
+  removeArtistFromTracks(artistId: string) {
+    this.tracks = this.tracks.map((track) =>
+      track.artistId === artistId ? { ...track, artistId: null } : track,
+    );
+  }
 }

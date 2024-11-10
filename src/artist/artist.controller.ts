@@ -8,13 +8,21 @@ import {
   Body,
   NotFoundException,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
+import { TrackService } from '../track/track.service';
+import { AlbumService } from '../album/album.service';
 
 @Controller('artist')
 export class ArtistController {
-  constructor(private readonly artistService: ArtistService) {}
+  constructor(
+    private readonly artistService: ArtistService,
+    private readonly trackService: TrackService,
+    private readonly albumService: AlbumService,
+  ) {}
 
   @Get()
   getAllArtists() {
@@ -72,6 +80,7 @@ export class ArtistController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT) // Устанавливаем код 204 в случае успешного удаления
   deleteArtist(@Param('id') id: string) {
     // Проверка на неправильный формат ID
     if (!id || id.length !== 36) {
@@ -83,6 +92,10 @@ export class ArtistController {
 
     // Удаление артиста
     this.artistService.deleteArtist(id);
+
+    // Сброс artistId для треков и альбомов
+    this.trackService.removeArtistFromTracks(id);
+    this.albumService.removeArtistFromAlbums(id);
 
     return { message: 'Artist successfully deleted' };
   }

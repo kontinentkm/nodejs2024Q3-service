@@ -39,4 +39,11 @@ export class AlbumService {
   deleteAlbum(id: string): void {
     this.albums = this.albums.filter((album) => album.id !== id);
   }
+
+  // метод для установки artistId на null для всех альбомов артиста
+  removeArtistFromAlbums(artistId: string) {
+    this.albums = this.albums.map((album) =>
+      album.artistId === artistId ? { ...album, artistId: null } : album,
+    );
+  }
 }
