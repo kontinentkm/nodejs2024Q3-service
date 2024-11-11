@@ -13,15 +13,14 @@ export class FavoritesController {
     return await this.favoritesService.getAllFavorites();
   }
 
-  // Добавить артистов, альбомы, треки в избранное
+  // Добавить артиста в избранное
   @Post('artist/:id')
   async addArtistToFavorites(
-    @Param('id') id: string,
-    @Body() createFavoriteDto: CreateFavoriteDto,
+    @Param('id') id: string, // Получаем ID артиста из параметров URL
+    @Body() createFavoriteDto: CreateFavoriteDto, // Данные артиста из тела запроса
   ) {
-    return await this.favoritesService.addToFavorites(
+    return await this.favoritesService.addArtistToFavorites(
       id,
-      'artist',
       createFavoriteDto,
     );
   }
