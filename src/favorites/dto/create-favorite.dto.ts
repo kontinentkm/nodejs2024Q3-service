@@ -7,4 +7,9 @@ export class CreateFavoriteDto {
 
   @IsString()
   name: string;
+
+  year?: number; // Только для альбомов
+  artistId?: string; // Для альбомов и треков
+  duration?: number; // Только для треков
+  grammy?: boolean; // Только для артистов
 }

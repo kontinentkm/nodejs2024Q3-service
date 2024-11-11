@@ -1,13 +1,17 @@
 // src/favorites/favorites.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 
 @Injectable()
 export class FavoritesService {
   private favorites = {
-    artist: [],
-    album: [],
-    track: [],
+    artist: [] as CreateFavoriteDto[], // Используем CreateFavoriteDto для каждого типа
+    album: [] as CreateFavoriteDto[],
+    track: [] as CreateFavoriteDto[],
   };
 
   // Получить все избранные элементы
@@ -20,28 +24,29 @@ export class FavoritesService {
   }
 
   // Добавить элемент в избранное
-  async addToFavorites(createFavoriteDto: CreateFavoriteDto, type: string) {
-    const { id, name } = createFavoriteDto;
-    // Проверка на наличие элемента в базе данных (например, поиск в другом сервисе)
-    if (!id || !name) {
-      throw new NotFoundException(`Invalid ${type} id or name`);
+  async addToFavorites(
+    id: string,
+    type: string,
+    createFavoriteDto: CreateFavoriteDto,
+  ) {
+    // Проверяем, если элемент уже есть в избранном
+    const existingItem = this.favorites[type].find((item) => item.id === id);
+    if (existingItem) {
+      throw new UnprocessableEntityException(`${type} already in favorites`);
     }
 
-    // Добавляем элемент в избранное
-    this.favorites[type].push({ id, name });
+    // Добавляем элемент в соответствующую категорию
+    const item = { id, ...createFavoriteDto }; // Объединяем id с данными из DTO
+    this.favorites[type].push(item);
     return true;
   }
 
   // Удалить элемент из избранного
   async removeFromFavorites(id: string, type: string) {
-    const index = this.favorites[type].findIndex(
-      (favorite) => favorite.id === id,
-    );
+    const index = this.favorites[type].findIndex((item) => item.id === id);
     if (index === -1) {
-      return false; // Элемент не найден
+      throw new NotFoundException(`${type} not found in favorites`);
     }
-
-    // Удаляем элемент из массива
     this.favorites[type].splice(index, 1);
     return true;
   }
