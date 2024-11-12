@@ -1,5 +1,5 @@
 // src/favorites/favorites.controller.ts
-import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto'; // DTO для обработки входных данных
 
@@ -51,16 +51,19 @@ export class FavoritesController {
 
   // Удалить артистов, альбомы, треки из избранного
   @Delete('artist/:id')
+  @HttpCode(HttpStatus.NO_CONTENT) 
   async deleteArtistFromFavorites(@Param('id') id: string) {
     return await this.favoritesService.removeFromFavorites(id, 'artist');
   }
 
   @Delete('album/:id')
+  @HttpCode(HttpStatus.NO_CONTENT) 
   async deleteAlbumFromFavorites(@Param('id') id: string) {
     return await this.favoritesService.removeFromFavorites(id, 'album');
   }
 
   @Delete('track/:id')
+  @HttpCode(HttpStatus.NO_CONTENT) 
   async deleteTrackFromFavorites(@Param('id') id: string) {
     return await this.favoritesService.removeFromFavorites(id, 'track');
   }
