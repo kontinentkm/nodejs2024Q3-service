@@ -13,8 +13,8 @@ RUN npm install
 # Копируем все остальные файлы приложения
 COPY . .
 
-# Устанавливаем NestJS CLI глобально
-RUN npm install -g @nestjs/cli
+# Генерируем Prisma клиент
+RUN npx prisma generate
 
 # Указываем порт, который используется приложением
 EXPOSE 4000
