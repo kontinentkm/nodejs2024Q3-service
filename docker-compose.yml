@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Контейнер для базы данных PostgreSQL
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+    ports:
+      - '5432:5432' # Опционально, для доступа к базе данных вне контейнера
+
+  # Контейнер для приложения
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: postgres # Адрес контейнера базы данных
+      DB_PORT: 5432
+      DB_USERNAME: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: mydatabase
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    ports:
+      - '4000:4000' # Порт для доступа к приложению
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:
