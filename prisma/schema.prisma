@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid()) // UUID v4
+  login     String
+  password  String
+  version   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites Favorites? @relation
+}
+
+model Favorites {
+  id        String   @id @default(uuid()) // UUID v4
+  userId    String   @unique // Добавляем уникальность
+  artists   String[] // Массив строк с ID артистов
+  albums    String[] // Массив строк с ID альбомов
+  tracks    String[] // Массив строк с ID треков
+
+  user      User     @relation(fields: [userId], references: [id]) // Связь с пользователем
+}
+
+model Track {
+  id        String   @id @default(uuid())  // UUID v4
+  name      String
+  artistId  String?  // Связь с артистом, может быть null
+  albumId   String?  // Связь с альбомом, может быть null
+  duration  Int      // Длительность трека в секундах
+
+  artist    Artist?  @relation(fields: [artistId], references: [id])
+  album     Album?   @relation(fields: [albumId], references: [id])
+}
+
+model Artist {
+  id       String   @id @default(uuid()) // UUID v4
+  name     String
+  grammy   Boolean // Признавался ли артист наградой Грэмми
+
+  tracks   Track[]  // Связь с треками
+  albums   Album[]  // Связь с альбомами
+}
+
+model Album {
+  id       String   @id @default(uuid()) // UUID v4
+  name     String
+  year     Int      // Год выпуска
+  artistId String?  // Связь с артистом, может быть null
+
+  artist   Artist?  @relation(fields: [artistId], references: [id])
+  tracks   Track[]  // Связь с треками
+}

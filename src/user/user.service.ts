@@ -1,4 +1,3 @@
-// src/user/user.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -7,71 +6,71 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { User } from './entities/user.entity'; // Импортируем класс User
-import { v4 as uuidv4 } from 'uuid';
-import { validate } from 'uuid';
+import { PrismaService } from '../../prisma/prisma.service'; // Импорт PrismaService
+import { v4 as uuidv4, validate } from 'uuid';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
+  constructor(private readonly prisma: PrismaService) {}
 
-  getAllUsers(): User[] {
-    return this.users;
+  async getAllUsers() {
+    return this.prisma.user.findMany(); // Получение всех пользователей из базы данных
   }
 
-  getUserById(id: string): User {
+  async getUserById(id: string) {
     if (!validate(id)) {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const user = this.users.find((user) => user.id === id);
+    const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
-  createUser(createUserDto: CreateUserDto): User {
+  async createUser(createUserDto: CreateUserDto) {
     if (!createUserDto.login || !createUserDto.password) {
       throw new BadRequestException('Missing required data');
     }
 
-    const newUser = new User({
-      id: uuidv4(),
-      login: createUserDto.login,
-      password: createUserDto.password,
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+    return this.prisma.user.create({
+      data: {
+        id: uuidv4(),
+        login: createUserDto.login,
+        password: createUserDto.password,
+        version: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     });
-
-    this.users.push(newUser);
-    return newUser;
   }
 
-  updatePassword(id: string, updatePasswordDto: UpdatePasswordDto): User {
+  async updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
     if (!validate(id)) {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const user = this.getUserById(id);
+    const user = await this.getUserById(id);
 
     if (user.password !== updatePasswordDto.oldPassword) {
       throw new ForbiddenException('Old password is incorrect');
     }
 
-    user.password = updatePasswordDto.newPassword;
-    user.version += 1;
-    user.updatedAt = Date.now();
-
-    return user;
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        password: updatePasswordDto.newPassword,
+        version: user.version + 1,
+        updatedAt: new Date(),
+      },
+    });
   }
 
-  deleteUser(id: string): void {
+  async deleteUser(id: string) {
     if (!validate(id)) {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const index = this.users.findIndex((user) => user.id === id);
-    if (index === -1) throw new NotFoundException('User not found');
-    this.users.splice(index, 1);
+    await this.getUserById(id); // Проверяем, существует ли пользователь
+    await this.prisma.user.delete({ where: { id } });
   }
 }

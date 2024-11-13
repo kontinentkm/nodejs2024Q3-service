@@ -10,8 +10,8 @@ export class User implements IUser {
   password: string;
 
   version: number;
-  createdAt: number;
-  updatedAt: number;
+  createdAt: Date;
+  updatedAt: Date;
 
   constructor(partial: Partial<IUser>) {
     Object.assign(this, partial);
