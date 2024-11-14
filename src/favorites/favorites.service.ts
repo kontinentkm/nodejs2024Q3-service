@@ -1,69 +1,92 @@
 // src/favorites/favorites.service.ts
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'prisma/prisma.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 
 @Injectable()
 export class FavoritesService {
-  private favorites = {
-    artist: [] as CreateFavoriteDto[],
-    album: [] as CreateFavoriteDto[],
-    track: [] as CreateFavoriteDto[],
-  };
+  constructor(private readonly prisma: PrismaService) {}
 
   // Получить все избранные элементы
   async getAllFavorites() {
-    return {
-      artists: this.favorites.artist,
-      albums: this.favorites.album,
-      tracks: this.favorites.track,
-    };
+    const favorites = await this.prisma.favorites.findMany({
+      include: {
+        artist: true, // Включаем данные артиста
+        album: true, // Включаем данные альбома
+        track: true, // Включаем данные трека
+        user: true, // Включаем данные пользователя
+      },
+    });
+
+    return favorites;
   }
 
-  // Добавить элемент в избранное
+  // Добавить артиста в избранное
+  async addArtistToFavorites(id: string, createFavoriteDto: CreateFavoriteDto) {
+    const artistExists = await this.prisma.artist.findUnique({
+      where: { id },
+    });
+
+    if (!artistExists) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    // Используем connect для связи с пользователем и артистом
+    const favorite = await this.prisma.favorites.create({
+      data: {
+        user: { connect: { id: createFavoriteDto.userId } }, // Пример: подключаем пользователя
+        artist: { connect: { id } }, // Подключаем артиста
+      },
+    });
+
+    return favorite;
+  }
+
+  // Добавить элемент в избранное (для альбомов и треков)
   async addToFavorites(
     id: string,
     type: string,
     createFavoriteDto: CreateFavoriteDto,
   ) {
-    // Проверяем, если элемент уже есть в избранном
-    const existingItem = this.favorites[type].find((item) => item.id === id);
-    if (existingItem) {
-      throw new UnprocessableEntityException(`${type} already in favorites`);
+    let itemExists;
+    if (type === 'artist') {
+      itemExists = await this.prisma.artist.findUnique({ where: { id } });
+    } else if (type === 'album') {
+      itemExists = await this.prisma.album.findUnique({ where: { id } });
+    } else if (type === 'track') {
+      itemExists = await this.prisma.track.findUnique({ where: { id } });
     }
 
-    // Добавляем элемент в соответствующую категорию
-    const item = { id, ...createFavoriteDto }; // Объединяем id с данными из DTO
-    this.favorites[type].push(item);
-    return true;
-  }
+    if (!itemExists) {
+      throw new NotFoundException(`${type} not found`);
+    }
 
-  // Добавить артиста в избранное
-  async addArtistToFavorites(
-    artistId: string,
-    createFavoriteDto: CreateFavoriteDto,
-  ) {
-    const artist = {
-      id: artistId,
-      name: createFavoriteDto.name,
-      grammy: createFavoriteDto.grammy,
-    };
+    // Используем connect для связи с сущностями
+    const favorite = await this.prisma.favorites.create({
+      data: {
+        user: { connect: { id: createFavoriteDto.userId } }, // Пример: подключаем пользователя
+        artist: type === 'artist' ? { connect: { id } } : undefined, // Подключаем артистов
+        album: type === 'album' ? { connect: { id } } : undefined, // Подключаем альбомы
+        track: type === 'track' ? { connect: { id } } : undefined, // Подключаем треки
+      },
+    });
 
-    console.log('Adding artist to favorites:', artist); // Для отладки
-    this.favorites.artist.push(artist);
-    return artist;
+    return favorite;
   }
 
   // Удалить элемент из избранного
   async removeFromFavorites(id: string, type: string) {
-    const index = this.favorites[type].findIndex((item) => item.id === id);
-    if (index === -1) {
+    const favorite = await this.prisma.favorites.findUnique({
+      where: { id },
+    });
+
+    if (!favorite) {
       throw new NotFoundException(`${type} not found in favorites`);
     }
-    this.favorites[type].splice(index, 1);
+
+    await this.prisma.favorites.delete({
+      where: { id },
+    });
     return true;
   }
 }

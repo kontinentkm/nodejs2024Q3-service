@@ -1,0 +1,10 @@
+# Используем стабильный и легкий образ PostgreSQL Alpine
+FROM postgres:alpine
+
+# Устанавливаем переменные среды для базы данных
+ENV POSTGRES_USER=myuser
+ENV POSTGRES_PASSWORD=mypassword
+ENV POSTGRES_DB=mydatabase
+
+# Открываем порт PostgreSQL
+EXPOSE 5432

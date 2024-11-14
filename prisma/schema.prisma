@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) // UUID v4
+  login     String
+  password  String
+  version   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites Favorites[] // Обратная связь для избранного (one-to-many)
+}
+
+model Favorites {
+  id       String  @id @default(uuid())
+  userId   String
+  artist   Artist? @relation(fields: [artistId], references: [id])
+  artistId String?
+  album    Album?  @relation(fields: [albumId], references: [id])
+  albumId  String?
+  track    Track?  @relation(fields: [trackId], references: [id])
+  trackId  String?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Track {
+  id       String  @id @default(uuid())
+  name     String
+  artistId String? // Связь с артистом
+  albumId  String? // Связь с альбомом
+  duration Int
+  artist   Artist? @relation(fields: [artistId], references: [id])
+  album    Album?  @relation(fields: [albumId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites Favorites[] // Обратная связь для избранного (one-to-many)
+}
+
+model Artist {
+  id     String  @id @default(uuid()) // UUID v4
+  name   String
+  grammy Boolean // Признавался ли артист наградой Грэмми
+
+  tracks Track[] // Связь с треками
+  albums Album[] // Связь с альбомами
+
+  favorites Favorites[] // Обратная связь для избранного (one-to-many)
+}
+
+model Album {
+  id        String   @id @default(cuid())
+  name      String
+  year      Int
+  artistId  String? // Optional artistId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  artist Artist? @relation(fields: [artistId], references: [id])
+  tracks Track[] // Связь с треками
+
+  favorites Favorites[] // Обратная связь для избранного (one-to-many)
+}
