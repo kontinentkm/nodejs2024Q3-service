@@ -1,3 +1,4 @@
+// src/artist/artist.controller.ts
 import {
   Controller,
   Get,
@@ -25,18 +26,18 @@ export class ArtistController {
   ) {}
 
   @Get()
-  getAllArtists() {
+  async getAllArtists() {
     return this.artistService.getAllArtists();
   }
 
   @Get(':id')
-  getArtistById(@Param('id') id: string) {
+  async getArtistById(@Param('id') id: string) {
     if (!id || id.length !== 36) {
       throw new BadRequestException('Invalid ID format');
     }
 
     try {
-      const artist = this.artistService.getArtistById(id);
+      const artist = await this.artistService.getArtistById(id);
       return artist;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -47,9 +48,9 @@ export class ArtistController {
   }
 
   @Post()
-  createArtist(@Body() createArtistDto: CreateArtistDto) {
+  async createArtist(@Body() createArtistDto: CreateArtistDto) {
     try {
-      return this.artistService.createArtist(createArtistDto);
+      return await this.artistService.createArtist(createArtistDto);
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw new BadRequestException(error.message);
@@ -59,18 +60,18 @@ export class ArtistController {
   }
 
   @Put(':id')
-  updateArtist(
+  async updateArtist(
     @Param('id') id: string,
     @Body() updateArtistDto: CreateArtistDto,
   ) {
-    // Проверка на неправильный формат ID
     if (!id || id.length !== 36) {
-      // Например, проверка длины UUID
       throw new BadRequestException('Invalid ID format');
     }
 
-    // Логика обновления художника
-    const updatedArtist = this.artistService.updateArtist(id, updateArtistDto);
+    const updatedArtist = await this.artistService.updateArtist(
+      id,
+      updateArtistDto,
+    );
 
     if (!updatedArtist) {
       throw new NotFoundException('Artist not found');
@@ -80,22 +81,19 @@ export class ArtistController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT) // Устанавливаем код 204 в случае успешного удаления
-  deleteArtist(@Param('id') id: string) {
-    // Проверка на неправильный формат ID
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteArtist(@Param('id') id: string) {
     if (!id || id.length !== 36) {
       throw new BadRequestException('Invalid ID format');
     }
 
-    // Используем getArtistById для проверки существования артиста
-    this.artistService.getArtistById(id);
+    await this.artistService.getArtistById(id); // Проверка существования артиста
 
-    // Удаление артиста
-    this.artistService.deleteArtist(id);
+    await this.artistService.deleteArtist(id);
 
     // Сброс artistId для треков и альбомов
-    this.trackService.removeArtistFromTracks(id);
-    this.albumService.removeArtistFromAlbums(id);
+    await this.trackService.removeArtistFromTracks(id);
+    await this.albumService.removeArtistFromAlbums(id);
 
     return { message: 'Artist successfully deleted' };
   }

@@ -1,63 +1,93 @@
+// src/artist/artist.service.ts
 import {
   Injectable,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { PrismaService } from 'prisma/prisma.service'; // Импорт PrismaService
 import { CreateArtistDto } from './dto/create-artist.dto';
-import { Artist } from './interfaces/artist.interface';
-import { v4 as uuidv4 } from 'uuid'; // Импорт функции uuidv4 для генерации UUID
+import { Artist } from '@prisma/client'; // Импортируем тип Artist от Prisma
 
 @Injectable()
 export class ArtistService {
-  private artists: Artist[] = [];
+  constructor(private prisma: PrismaService) {}
 
   // Получение всех артистов
-  getAllArtists(): Artist[] {
-    return this.artists;
+  async getAllArtists(): Promise<Artist[]> {
+    return this.prisma.artist.findMany();
   }
 
   // Получение артиста по ID
-  getArtistById(id: string): Artist | void {
-    const artist = this.artists.find((artist) => artist.id === id);
+  async getArtistById(id: string): Promise<Artist> {
+    const artist = await this.prisma.artist.findUnique({
+      where: { id },
+    });
+
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }
+
     return artist;
   }
 
   // Создание нового артиста
-  createArtist(createArtistDto: CreateArtistDto): Artist {
-    if (!createArtistDto.name || typeof createArtistDto.grammy !== 'boolean') {
+  async createArtist(createArtistDto: CreateArtistDto): Promise<Artist> {
+    const { name, grammy } = createArtistDto;
+
+    // Проверка данных
+    if (!name || typeof grammy !== 'boolean') {
       throw new BadRequestException('Invalid artist data');
     }
-    const newArtist: Artist = {
-      id: uuidv4(), // Генерация уникального UUID
-      name: createArtistDto.name,
-      grammy: createArtistDto.grammy,
-    };
-    this.artists.push(newArtist);
+
+    const newArtist = await this.prisma.artist.create({
+      data: {
+        name,
+        grammy,
+      },
+    });
+
     return newArtist;
   }
 
   // Обновление данных артиста
-  updateArtist(id: string, updateArtistDto: CreateArtistDto): Artist {
-    const artist = this.artists.find((artist) => artist.id === id);
+  async updateArtist(
+    id: string,
+    updateArtistDto: CreateArtistDto,
+  ): Promise<Artist> {
+    const { name, grammy } = updateArtistDto;
+
+    const artist = await this.prisma.artist.findUnique({
+      where: { id },
+    });
+
     if (!artist) {
       throw new NotFoundException('Artist not found');
     }
-    if (!updateArtistDto.name || typeof updateArtistDto.grammy !== 'boolean') {
-      throw new BadRequestException('Invalid update data');
-    }
-    Object.assign(artist, updateArtistDto);
-    return artist;
+
+    const updatedArtist = await this.prisma.artist.update({
+      where: { id },
+      data: {
+        name,
+        grammy,
+      },
+    });
+
+    return updatedArtist;
   }
 
   // Удаление артиста
-  deleteArtist(id: string): void {
-    const artistIndex = this.artists.findIndex((artist) => artist.id === id);
-    if (artistIndex === -1) {
+  async deleteArtist(id: string): Promise<void> {
+    const artist = await this.prisma.artist.findUnique({
+      where: { id },
+    });
+
+    if (!artist) {
       throw new NotFoundException('Artist not found');
     }
-    this.artists.splice(artistIndex, 1);
+
+    // Удаление артиста
+    await this.prisma.artist.delete({
+      where: { id },
+    });
   }
 }
