@@ -23,16 +23,16 @@ export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Get()
-  getAllAlbums() {
+  async getAllAlbums() {
     return this.albumService.getAllAlbums();
   }
 
   @Get(':id')
-  getAlbumById(@Param('id') id: string) {
+  async getAlbumById(@Param('id') id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid ID format');
     }
-    const album = this.albumService.getAlbumById(id);
+    const album = await this.albumService.getAlbumById(id);
     if (!album) throw new NotFoundException();
     return album;
   }
@@ -40,29 +40,30 @@ export class AlbumController {
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @HttpCode(HttpStatus.CREATED)
-  createAlbum(@Body() createAlbumDto: CreateAlbumDto) {
+  async createAlbum(@Body() createAlbumDto: CreateAlbumDto) {
     return this.albumService.createAlbum(createAlbumDto);
   }
 
   @Put(':id')
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  updateAlbum(@Param('id') id: string, @Body() updateAlbumDto: CreateAlbumDto) {
+  async updateAlbum(
+    @Param('id') id: string,
+    @Body() updateAlbumDto: CreateAlbumDto,
+  ) {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid ID format');
     }
-    const album = this.albumService.updateAlbum(id, updateAlbumDto);
+    const album = await this.albumService.updateAlbum(id, updateAlbumDto);
     if (!album) throw new NotFoundException();
     return album;
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteAlbum(@Param('id') id: string) {
+  async deleteAlbum(@Param('id') id: string) {
     if (!isUUID(id)) {
       throw new BadRequestException('Invalid ID format');
     }
-    const album = this.albumService.getAlbumById(id);
-    if (!album) throw new NotFoundException();
-    this.albumService.deleteAlbum(id);
+    await this.albumService.deleteAlbum(id);
   }
 }

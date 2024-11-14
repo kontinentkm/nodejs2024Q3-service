@@ -55,10 +55,12 @@ model Artist {
 }
 
 model Album {
-  id       String   @id @default(uuid()) // UUID v4
-  name     String
-  year     Int      // Год выпуска
-  artistId String?  // Связь с артистом, может быть null
+  id        String   @id @default(cuid()) 
+  name      String
+  year      Int
+  artistId  String?  // Optional artistId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   artist   Artist?  @relation(fields: [artistId], references: [id])
   tracks   Track[]  // Связь с треками

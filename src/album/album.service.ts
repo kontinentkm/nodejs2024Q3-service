@@ -1,56 +1,81 @@
 // src/album/album.service.ts
-import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'prisma/prisma.service'; // Импортируем PrismaService
 import { CreateAlbumDto } from './dto/create-album.dto';
-import { Album } from './interfaces/album.interface';
-import { TrackService } from '../track/track.service'; // Подключите TrackService
+import { Album } from '@prisma/client'; // Импортируем тип Album от Prisma
+import { TrackService } from '../track/track.service'; // Подключаем TrackService
 
 @Injectable()
 export class AlbumService {
-  private albums: Album[] = [];
+  constructor(
+    private readonly prisma: PrismaService, // Используем PrismaService
+    private readonly trackService: TrackService,
+  ) {}
 
-  constructor(private readonly trackService: TrackService) {}
-
-  getAllAlbums(): Album[] {
-    return this.albums;
+  async getAllAlbums(): Promise<Album[]> {
+    return this.prisma.album.findMany(); // Используем Prisma для получения всех альбомов
   }
 
-  getAlbumById(id: string): Album | undefined {
-    return this.albums.find((album) => album.id === id);
+  async getAlbumById(id: string): Promise<Album | null> {
+    return this.prisma.album.findUnique({
+      where: { id },
+    }); // Используем Prisma для получения альбома по ID
   }
 
-  createAlbum(createAlbumDto: CreateAlbumDto): Album {
-    const newAlbum: Album = {
-      id: uuidv4(),
-      name: createAlbumDto.name,
-      year: createAlbumDto.year,
-      artistId: createAlbumDto.artistId || null,
-    };
-    this.albums.push(newAlbum);
-    return newAlbum;
+  async createAlbum(createAlbumDto: CreateAlbumDto): Promise<Album> {
+    return this.prisma.album.create({
+      data: {
+        name: createAlbumDto.name,
+        year: createAlbumDto.year,
+        artistId: createAlbumDto.artistId || null,
+      },
+    }); // Создаем новый альбом через Prisma
   }
 
-  updateAlbum(id: string, updateAlbumDto: CreateAlbumDto): Album | null {
-    const album = this.albums.find((album) => album.id === id);
-    if (album) {
-      Object.assign(album, updateAlbumDto);
-      return album;
+  async updateAlbum(
+    id: string,
+    updateAlbumDto: CreateAlbumDto,
+  ): Promise<Album | null> {
+    const album = await this.prisma.album.findUnique({
+      where: { id },
+    });
+
+    if (!album) {
+      throw new NotFoundException(`Album with ID ${id} not found`); // Проверка, что альбом существует
     }
-    return null;
+
+    return this.prisma.album.update({
+      where: { id },
+      data: {
+        name: updateAlbumDto.name,
+        year: updateAlbumDto.year,
+        artistId: updateAlbumDto.artistId || null,
+      },
+    }); // Обновляем альбом через Prisma
   }
 
-  deleteAlbum(id: string): void {
-    // Удаляем альбом из списка
-    this.albums = this.albums.filter((album) => album.id !== id);
+  async deleteAlbum(id: string): Promise<void> {
+    const album = await this.prisma.album.findUnique({
+      where: { id },
+    });
 
-    // Устанавливаем albumId в null для всех треков, связанных с этим альбомом
-    this.trackService.clearAlbumId(id);
+    if (!album) {
+      throw new NotFoundException(`Album with ID ${id} not found`); // Проверка, что альбом существует
+    }
+
+    await this.prisma.album.delete({
+      where: { id },
+    }); // Удаляем альбом через Prisma
+
+    // Устанавливаем albumId на null для всех треков, связанных с альбомом
+    await this.trackService.clearAlbumId(id);
   }
 
   // метод для установки artistId на null для всех альбомов артиста
-  removeArtistFromAlbums(artistId: string) {
-    this.albums = this.albums.map((album) =>
-      album.artistId === artistId ? { ...album, artistId: null } : album,
-    );
+  async removeArtistFromAlbums(artistId: string): Promise<void> {
+    await this.prisma.album.updateMany({
+      where: { artistId },
+      data: { artistId: null },
+    }); // Обновляем все альбомы, связанные с артистом
   }
 }
