@@ -1,60 +1,87 @@
-// src\track\track.service.ts
-import { Injectable } from '@nestjs/common';
+//track.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'prisma/prisma.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { Track } from './interfaces/track.interface';
-import { v4 as uuidv4 } from 'uuid'; // Импорт функции uuidv4 для генерации UUID
 
 @Injectable()
 export class TrackService {
-  private tracks: Track[] = [];
+  constructor(private readonly prisma: PrismaService) {}
 
-  getAllTracks(): Track[] {
-    return this.tracks;
+  // Получить все треки
+  async getAllTracks(): Promise<Track[]> {
+    return this.prisma.track.findMany({
+      include: {
+        artist: true, // Включаем информацию об артисте
+        album: true, // Включаем информацию об альбоме
+      },
+    });
   }
 
-  getTrackById(id: string): Track | undefined {
-    return this.tracks.find((track) => track.id === id);
+  // Получить трек по ID
+  async getTrackById(id: string): Promise<Track | null> {
+    return this.prisma.track.findUnique({
+      where: { id },
+      include: {
+        artist: true,
+        album: true,
+      },
+    });
   }
 
-  createTrack(createTrackDto: CreateTrackDto): Track {
-    const newTrack: Track = {
-      id: uuidv4(), // Генерация уникального UUID
-      name: createTrackDto.name,
-      artistId: createTrackDto.artistId,
-      albumId: createTrackDto.albumId ?? null,
-      duration: createTrackDto.duration,
-    };
-    this.tracks.push(newTrack);
-    return newTrack;
+  // Создать новый трек
+  async createTrack(createTrackDto: CreateTrackDto): Promise<Track> {
+    return this.prisma.track.create({
+      data: {
+        name: createTrackDto.name,
+        artistId: createTrackDto.artistId,
+        albumId: createTrackDto.albumId ?? null,
+        duration: createTrackDto.duration,
+      },
+    });
   }
 
-  updateTrack(
+  // Обновить трек по ID
+  async updateTrack(
     id: string,
     updateTrackDto: Partial<CreateTrackDto>,
-  ): Track | null {
-    const track = this.tracks.find((track) => track.id === id);
-    if (track) {
-      Object.assign(track, updateTrackDto);
-      return track;
+  ): Promise<Track | null> {
+    const track = await this.prisma.track.findUnique({ where: { id } });
+    if (!track) {
+      throw new NotFoundException('Track not found');
     }
-    return null;
+
+    return this.prisma.track.update({
+      where: { id },
+      data: updateTrackDto,
+    });
   }
 
-  deleteTrack(id: string): void {
-    this.tracks = this.tracks.filter((track) => track.id !== id);
+  // Удалить трек по ID
+  async deleteTrack(id: string): Promise<void> {
+    const track = await this.prisma.track.findUnique({ where: { id } });
+    if (!track) {
+      throw new NotFoundException('Track not found');
+    }
+
+    await this.prisma.track.delete({
+      where: { id },
+    });
   }
 
-  // метод для установки artistId на null для всех треков артиста
-  removeArtistFromTracks(artistId: string) {
-    this.tracks = this.tracks.map((track) =>
-      track.artistId === artistId ? { ...track, artistId: null } : track,
-    );
+  // Удалить artistId для всех треков артиста
+  async removeArtistFromTracks(artistId: string): Promise<void> {
+    await this.prisma.track.updateMany({
+      where: { artistId },
+      data: { artistId: null },
+    });
   }
 
-  // метод для установки albumId в null для треков с указанным albumId
-  clearAlbumId(albumId: string): void {
-    this.tracks = this.tracks.map((track) =>
-      track.albumId === albumId ? { ...track, albumId: null } : track,
-    );
+  // Очистить albumId для всех треков с указанным albumId
+  async clearAlbumId(albumId: string): Promise<void> {
+    await this.prisma.track.updateMany({
+      where: { albumId },
+      data: { albumId: null },
+    });
   }
 }

@@ -38,11 +38,13 @@ model Favorites {
 }
 
 model Track {
-  id        String   @id @default(uuid())  // UUID v4
+  id        String   @id @default(uuid())
   name      String
-  artistId  String?  // Связь с артистом, может быть null
-  albumId   String?  // Связь с альбомом, может быть null
-  duration  Int      // Длительность трека в секундах
+  artistId  String?  // Связь с артистом
+  albumId   String?  // Связь с альбомом
+  duration  Int
+  artist    Artist?  @relation(fields: [artistId], references: [id])
+  album     Album?   @relation(fields: [albumId], references: [id])
 
   artist    Artist?  @relation(fields: [artistId], references: [id])
   album     Album?   @relation(fields: [albumId], references: [id])

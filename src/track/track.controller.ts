@@ -12,26 +12,26 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { validate as isUUID } from 'uuid';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { Track } from './interfaces/track.interface';
+import { validate as isUUID } from 'uuid';
 
 @Controller('track')
 export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Get()
-  getAllTracks(): Track[] {
+  async getAllTracks(): Promise<Track[]> {
     return this.trackService.getAllTracks();
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getTrackById(@Param('id') id: string): Track | undefined {
-    if (!isUUID(id)) throw new BadRequestException();
-    const track = this.trackService.getTrackById(id);
-    if (!track) throw new NotFoundException();
+  async getTrackById(@Param('id') id: string): Promise<Track> {
+    if (!isUUID(id)) throw new BadRequestException('Invalid ID format');
+    const track = await this.trackService.getTrackById(id);
+    if (!track) throw new NotFoundException('Track not found');
     return track;
   }
 
@@ -43,24 +43,26 @@ export class TrackController {
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  updateTrack(
+  async updateTrack(
     @Param('id') id: string,
     @Body() updateTrackDto: Partial<CreateTrackDto>,
-  ): Track | null {
+  ): Promise<Track> {
     if (!isUUID(id)) {
-      // Проверка, является ли ID валидным UUID
-      throw new BadRequestException('Invalid ID format'); // Возвращаем 400 ошибку
+      throw new BadRequestException('Invalid ID format');
     }
-    const updatedTrack = this.trackService.updateTrack(id, updateTrackDto);
-    if (!updatedTrack) throw new NotFoundException();
+    const updatedTrack = await this.trackService.updateTrack(
+      id,
+      updateTrackDto,
+    );
+    if (!updatedTrack) throw new NotFoundException('Track not found');
     return updatedTrack;
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteTrack(@Param('id') id: string): void {
-    const track = this.trackService.getTrackById(id);
-    if (!track) throw new NotFoundException();
-    this.trackService.deleteTrack(id);
+  async deleteTrack(@Param('id') id: string): Promise<void> {
+    const track = await this.trackService.getTrackById(id);
+    if (!track) throw new NotFoundException('Track not found');
+    await this.trackService.deleteTrack(id);
   }
 }
