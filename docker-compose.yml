@@ -20,6 +20,7 @@ services:
       - app-network
     ports:
       - '4000:4000' # Порт для доступа к приложению
+      - '5555:5555' # Порт для доступа к Prisma Studio
 
     # Контейнер для базы данных PostgreSQL
   postgres:
