@@ -21,7 +21,28 @@ export class FavoritesService {
     return favorites;
   }
 
-  // Добавить элемент в избранное
+  // Добавить артиста в избранное
+  async addArtistToFavorites(id: string, createFavoriteDto: CreateFavoriteDto) {
+    const artistExists = await this.prisma.artist.findUnique({
+      where: { id },
+    });
+
+    if (!artistExists) {
+      throw new NotFoundException('Artist not found');
+    }
+
+    // Используем connect для связи с пользователем и артистом
+    const favorite = await this.prisma.favorites.create({
+      data: {
+        user: { connect: { id: createFavoriteDto.userId } }, // Пример: подключаем пользователя
+        artist: { connect: { id } }, // Подключаем артиста
+      },
+    });
+
+    return favorite;
+  }
+
+  // Добавить элемент в избранное (для альбомов и треков)
   async addToFavorites(
     id: string,
     type: string,
