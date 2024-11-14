@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,59 +8,65 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid()) // UUID v4
+  id        String   @id @default(uuid()) // UUID v4
   login     String
   password  String
   version   Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  favorites Favorites? @relation
+  favorites Favorites[] // Обратная связь для избранного (one-to-many)
 }
 
 model Favorites {
-  id      String   @id @default(uuid())
-  userId  String
-  artist  Artist?  @relation(fields: [artistId], references: [id])
+  id       String  @id @default(uuid())
+  userId   String
+  artist   Artist? @relation(fields: [artistId], references: [id])
   artistId String?
-  album   Album?   @relation(fields: [albumId], references: [id])
-  albumId String?
-  track   Track?   @relation(fields: [trackId], references: [id])
-  trackId String?
+  album    Album?  @relation(fields: [albumId], references: [id])
+  albumId  String?
+  track    Track?  @relation(fields: [trackId], references: [id])
+  trackId  String?
 
-  user    User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Track {
-  id        String   @id @default(uuid())
-  name      String
-  artistId  String?  // Связь с артистом
-  albumId   String?  // Связь с альбомом
-  duration  Int
-  artist    Artist?  @relation(fields: [artistId], references: [id])
-  album     Album?   @relation(fields: [albumId], references: [id])
-
-  artist    Artist?  @relation(fields: [artistId], references: [id])
-  album     Album?   @relation(fields: [albumId], references: [id])
-}
-
-model Artist {
-  id       String   @id @default(uuid()) // UUID v4
+  id       String  @id @default(uuid())
   name     String
-  grammy   Boolean // Признавался ли артист наградой Грэмми
+  artistId String? // Связь с артистом
+  albumId  String? // Связь с альбомом
+  duration Int
+  artist   Artist? @relation(fields: [artistId], references: [id])
+  album    Album?  @relation(fields: [albumId], references: [id])
 
-  tracks   Track[]  // Связь с треками
-  albums   Album[]  // Связь с альбомами
-}
-
-model Album {
-  id        String   @id @default(cuid()) 
-  name      String
-  year      Int
-  artistId  String?  // Optional artistId
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  artist   Artist?  @relation(fields: [artistId], references: [id])
-  tracks   Track[]  // Связь с треками
+  favorites Favorites[] // Обратная связь для избранного (one-to-many)
+}
+
+model Artist {
+  id     String  @id @default(uuid()) // UUID v4
+  name   String
+  grammy Boolean // Признавался ли артист наградой Грэмми
+
+  tracks Track[] // Связь с треками
+  albums Album[] // Связь с альбомами
+
+  favorites Favorites[] // Обратная связь для избранного (one-to-many)
+}
+
+model Album {
+  id        String   @id @default(cuid())
+  name      String
+  year      Int
+  artistId  String? // Optional artistId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  artist Artist? @relation(fields: [artistId], references: [id])
+  tracks Track[] // Связь с треками
+
+  favorites Favorites[] // Обратная связь для избранного (one-to-many)
 }

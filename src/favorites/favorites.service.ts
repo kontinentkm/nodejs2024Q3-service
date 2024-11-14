@@ -1,6 +1,6 @@
 // src/favorites/favorites.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service'; // Импорт PrismaService
+import { PrismaService } from 'prisma/prisma.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 
 @Injectable()
@@ -11,9 +11,10 @@ export class FavoritesService {
   async getAllFavorites() {
     const favorites = await this.prisma.favorites.findMany({
       include: {
-        artist: true,
-        album: true,
-        track: true,
+        artist: true, // Включаем данные артиста
+        album: true, // Включаем данные альбома
+        track: true, // Включаем данные трека
+        user: true, // Включаем данные пользователя
       },
     });
 
@@ -26,7 +27,6 @@ export class FavoritesService {
     type: string,
     createFavoriteDto: CreateFavoriteDto,
   ) {
-    // Проверка существования элемента
     let itemExists;
     if (type === 'artist') {
       itemExists = await this.prisma.artist.findUnique({ where: { id } });
@@ -40,44 +40,13 @@ export class FavoritesService {
       throw new NotFoundException(`${type} not found`);
     }
 
-    // Добавляем элемент в избранное
+    // Используем connect для связи с сущностями
     const favorite = await this.prisma.favorites.create({
       data: {
-        [type]: {
-          connect: { id },
-        },
-        // Убедимся, что добавляем все возможные данные
-        name: createFavoriteDto.name,
-        artistId: createFavoriteDto.artistId,
-        grammy: createFavoriteDto.grammy,
-        year: createFavoriteDto.year,
-        duration: createFavoriteDto.duration,
-      },
-    });
-
-    return favorite;
-  }
-
-  // Добавить артиста в избранное
-  async addArtistToFavorites(
-    artistId: string,
-    createFavoriteDto: CreateFavoriteDto,
-  ) {
-    const artist = await this.prisma.artist.findUnique({
-      where: { id: artistId },
-    });
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
-    }
-
-    // Добавление артиста в избранное
-    const favorite = await this.prisma.favorites.create({
-      data: {
-        artist: {
-          connect: { id: artistId },
-        },
-        name: createFavoriteDto.name,
-        grammy: createFavoriteDto.grammy,
+        user: { connect: { id: createFavoriteDto.userId } }, // Пример: подключаем пользователя
+        artist: type === 'artist' ? { connect: { id } } : undefined, // Подключаем артистов
+        album: type === 'album' ? { connect: { id } } : undefined, // Подключаем альбомы
+        track: type === 'track' ? { connect: { id } } : undefined, // Подключаем треки
       },
     });
 

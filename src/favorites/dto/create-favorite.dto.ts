@@ -20,4 +20,6 @@ export class CreateFavoriteDto {
   @IsOptional() // Для артистов добавляем поле grammy
   @IsBoolean()
   grammy?: boolean;
+
+  userId?: string; // Добавьте поле userId для связи с пользователем
 }
