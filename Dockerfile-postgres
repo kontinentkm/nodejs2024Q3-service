@@ -1,5 +1,5 @@
-# Используем официальный образ PostgreSQL
-FROM postgres:latest
+# Используем стабильный и легкий образ PostgreSQL Alpine
+FROM postgres:alpine
 
 # Устанавливаем переменные среды для базы данных
 ENV POSTGRES_USER=myuser
