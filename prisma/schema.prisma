@@ -25,13 +25,16 @@ model User {
 }
 
 model Favorites {
-  id        String   @id @default(uuid()) // UUID v4
-  userId    String   @unique // Добавляем уникальность
-  artists   String[] // Массив строк с ID артистов
-  albums    String[] // Массив строк с ID альбомов
-  tracks    String[] // Массив строк с ID треков
+  id      String   @id @default(uuid())
+  userId  String
+  artist  Artist?  @relation(fields: [artistId], references: [id])
+  artistId String?
+  album   Album?   @relation(fields: [albumId], references: [id])
+  albumId String?
+  track   Track?   @relation(fields: [trackId], references: [id])
+  trackId String?
 
-  user      User     @relation(fields: [userId], references: [id]) // Связь с пользователем
+  user    User @relation(fields: [userId], references: [id])
 }
 
 model Track {
