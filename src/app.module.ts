@@ -10,7 +10,8 @@ import { TrackModule } from './track/track.module';
 import { AlbumModule } from './album/album.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { PrismaService } from '../prisma/prisma.service';
-import { LoggingService } from './logging/logging.service';
+import { LoggingModule } from './logging/logging.module';
+import { LoggingService } from './logging/logging/logging.service';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 @Module({
@@ -28,7 +29,7 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: true, // Включите только для разработки!
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),
@@ -37,6 +38,7 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
     TrackModule,
     AlbumModule,
     FavoritesModule,
+    LoggingModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, LoggingService, HttpExceptionFilter],

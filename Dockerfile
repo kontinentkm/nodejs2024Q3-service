@@ -16,6 +16,8 @@ COPY . .
 # Генерируем Prisma клиент
 RUN npx prisma generate
 
+RUN chmod -R 777 /usr/src/app/logs
+
 # Указываем порт, который используется приложением
 EXPOSE 4000
 
