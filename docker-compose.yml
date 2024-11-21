@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: kontinentkm/nodejs2024q3-service
     volumes:
       - ./.env:/usr/src/app/.env
     environment:
