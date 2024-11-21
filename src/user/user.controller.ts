@@ -78,7 +78,7 @@ export class UserController {
   }
 
   @Put(':id')
-  @UsePipes(new ValidationPipe({ transform: true })) // Добавляем валидацию
+  @UsePipes(new ValidationPipe({ transform: true }))
   async updatePassword(
     @Param('id') id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,

@@ -1,3 +1,4 @@
+//user.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -6,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { PrismaService } from '../../prisma/prisma.service'; // Импорт PrismaService
+import { PrismaService } from '../../prisma/prisma.service';
 import { v4 as uuidv4, validate } from 'uuid';
 
 @Injectable()
@@ -14,7 +15,7 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllUsers() {
-    return this.prisma.user.findMany(); // Получение всех пользователей из базы данных
+    return this.prisma.user.findMany();
   }
 
   async getUserById(id: string) {

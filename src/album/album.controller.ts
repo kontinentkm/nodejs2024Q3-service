@@ -17,7 +17,7 @@ import {
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { isUUID } from 'class-validator';
-import { LoggingService } from '../logging/logging.service';
+import { LoggingService } from '../logging/logging/logging.service';
 
 @Controller('album')
 export class AlbumController {

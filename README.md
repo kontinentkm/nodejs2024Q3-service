@@ -80,41 +80,49 @@ Once Prisma Studio is running, it will be available at http://localhost:5555.
 ### Getting Data
 
 #### Get all users:
+
 ```http
-GET http://localhost:4000/users
+GET http://localhost:4000/user
 ```
 
 #### Get a user by ID:
+
 ```http
-GET http://localhost:4000/users/:id
+GET http://localhost:4000/user/:id
 ```
 
 #### Get all albums:
+
 ```http
-GET http://localhost:4000/albums
+GET http://localhost:4000/album
 ```
 
 #### Get an album by ID:
+
 ```http
-GET http://localhost:4000/albums/:id
+GET http://localhost:4000/album/:id
 ```
 
 #### Get all tracks:
+
 ```http
-GET http://localhost:4000/tracks
+GET http://localhost:4000/track
 ```
 
 #### Get a track by ID:
+
 ```http
-GET http://localhost:4000/tracks/:id
+GET http://localhost:4000/track/:id
 ```
 
 #### Get all favorites:
+
 ```http
 GET http://localhost:4000/favs
 ```
 
 #### Get favorites by type (artists, albums, tracks):
+
 ```http
 GET http://localhost:4000/favs/artist/:id
 GET http://localhost:4000/favs/album/:id
@@ -126,8 +134,9 @@ GET http://localhost:4000/favs/track/:id
 ### Adding Data
 
 #### Add a new user:
+
 ```http
-POST http://localhost:4000/users
+POST http://localhost:4000/user
 Content-Type: application/json
 
 {
@@ -137,8 +146,9 @@ Content-Type: application/json
 ```
 
 #### Add a new album:
+
 ```http
-POST http://localhost:4000/albums
+POST http://localhost:4000/album
 Content-Type: application/json
 
 {
@@ -149,8 +159,9 @@ Content-Type: application/json
 ```
 
 #### Add a new track:
+
 ```http
-POST http://localhost:4000/tracks
+POST http://localhost:4000/track
 Content-Type: application/json
 
 {
@@ -161,6 +172,7 @@ Content-Type: application/json
 ```
 
 #### Add a new item to favorites (e.g., artist):
+
 ```http
 POST http://localhost:4000/favs/artist/:id
 Content-Type: application/json
@@ -171,6 +183,7 @@ Content-Type: application/json
 ```
 
 #### Add a new item to favorites (e.g., album or track):
+
 ```http
 POST http://localhost:4000/favs/album/:id
 POST http://localhost:4000/favs/track/:id
@@ -186,8 +199,9 @@ Content-Type: application/json
 ### Updating Data
 
 #### Update a user:
+
 ```http
-PUT http://localhost:4000/users/:id
+PUT http://localhost:4000/user/:id
 Content-Type: application/json
 
 {
@@ -197,8 +211,9 @@ Content-Type: application/json
 ```
 
 #### Update an album:
+
 ```http
-PUT http://localhost:4000/albums/:id
+PUT http://localhost:4000/album/:id
 Content-Type: application/json
 
 {
@@ -209,8 +224,9 @@ Content-Type: application/json
 ```
 
 #### Update a track:
+
 ```http
-PUT http://localhost:4000/tracks/:id
+PUT http://localhost:4000/track/:id
 Content-Type: application/json
 
 {
@@ -225,26 +241,31 @@ Content-Type: application/json
 ### Deleting Data
 
 #### Delete a user:
+
 ```http
-DELETE http://localhost:4000/users/:id
+DELETE http://localhost:4000/user/:id
 ```
 
 #### Delete an album:
+
 ```http
-DELETE http://localhost:4000/albums/:id
+DELETE http://localhost:4000/album/:id
 ```
 
 #### Delete a track:
+
 ```http
-DELETE http://localhost:4000/tracks/:id
+DELETE http://localhost:4000/track/:id
 ```
 
 #### Delete an item from favorites (e.g., artist):
+
 ```http
 DELETE http://localhost:4000/favs/artist/:id
 ```
 
 #### Delete an item from favorites (e.g., album or track):
+
 ```http
 DELETE http://localhost:4000/favs/album/:id
 DELETE http://localhost:4000/favs/track/:id
@@ -255,13 +276,17 @@ DELETE http://localhost:4000/favs/track/:id
 ### Notes
 
 #### Data Types:
+
 - **Content-Type**: application/json — All requests that include a request body must use this header.
 
 #### Identifiers:
+
 - For requests that affect specific entities (e.g., `:id`), replace the placeholder with the actual identifier of the entity.
 
 #### Authorization:
+
 - If your API requires authorization (e.g., using tokens), make sure to include the token in the header:
+
 ```http
 Authorization: Bearer <your_token>
 ```

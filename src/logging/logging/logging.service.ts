@@ -5,6 +5,15 @@ import * as path from 'path';
 
 @Injectable()
 export class LoggingService extends Logger {
+  constructor() {
+    super();
+    try {
+      console.log('LoggingService initialized');
+    } catch (err) {
+      console.error('Error initializing LoggingService:', err);
+    }
+  }
+
   // Путь для логов внутри контейнера
   private logFile = path.join('/usr/src/app/logs', 'app.log');
   private errorFile = path.join('/usr/src/app/logs', 'errors.log');
