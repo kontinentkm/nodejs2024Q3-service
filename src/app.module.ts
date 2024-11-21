@@ -11,6 +11,7 @@ import { AlbumModule } from './album/album.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoggingService } from './logging/logging.service';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 @Module({
   imports: [
@@ -38,7 +39,7 @@ import { LoggingService } from './logging/logging.service';
     FavoritesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService, LoggingService],
-  exports: [LoggingService],
+  providers: [AppService, PrismaService, LoggingService, HttpExceptionFilter],
+  exports: [LoggingService, HttpExceptionFilter],
 })
 export class AppModule {}
