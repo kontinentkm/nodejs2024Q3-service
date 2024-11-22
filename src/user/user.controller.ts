@@ -20,7 +20,6 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { LoggingService } from '../logging/logging/logging.service';
 import { isUUID } from 'class-validator';
-import { plainToClass } from 'class-transformer';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)

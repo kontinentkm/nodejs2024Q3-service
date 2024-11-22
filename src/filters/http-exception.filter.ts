@@ -18,15 +18,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
-    const path = request?.url || 'unknown'; // Безопасная обработка пути
+    const path = request?.url || 'unknown';
 
-    // Определяем статус
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    // Получение сообщения об ошибке
     const message =
       exception instanceof HttpException
         ? typeof exception.getResponse() === 'string'
@@ -34,13 +32,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
           : (exception.getResponse() as any)?.message || 'Internal server error'
         : 'Internal server error';
 
-    // Логирование ошибки
+    // Логируем ошибку
     this.logger.error(
       `HTTP ${status} Error: ${JSON.stringify(message)} - Path: ${path}`,
-      exception instanceof Error ? exception.stack : undefined, // Передаем стек при наличии
+      exception instanceof Error ? exception.stack : undefined,
     );
 
-    // Ответ клиенту
+    // Возвращаем ответ клиенту
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
