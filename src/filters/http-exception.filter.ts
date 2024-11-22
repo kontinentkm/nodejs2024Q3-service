@@ -18,26 +18,33 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
+    const path = request?.url || 'unknown'; // Безопасная обработка пути
 
+    // Определяем статус
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
+    // Получение сообщения об ошибке
     const message =
       exception instanceof HttpException
-        ? exception.getResponse()
+        ? typeof exception.getResponse() === 'string'
+          ? exception.getResponse()
+          : (exception.getResponse() as any)?.message || 'Internal server error'
         : 'Internal server error';
 
+    // Логирование ошибки
     this.logger.error(
-      `HTTP ${status} Error: ${JSON.stringify(message)} - Path: ${request.url}`,
-      exception instanceof Error ? exception.stack : undefined, // Передаем trace
+      `HTTP ${status} Error: ${JSON.stringify(message)} - Path: ${path}`,
+      exception instanceof Error ? exception.stack : undefined, // Передаем стек при наличии
     );
 
+    // Ответ клиенту
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path,
       message,
     });
   }
