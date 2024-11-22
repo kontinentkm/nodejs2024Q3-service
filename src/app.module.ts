@@ -13,6 +13,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LoggingModule } from './logging/logging.module';
 import { LoggingService } from './logging/logging/logging.service';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { AuthModule } from './auth/auth.module';
+import { ProtectedModule } from './protected/protected.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
     AlbumModule,
     FavoritesModule,
     LoggingModule,
+    AuthModule,
+    ProtectedModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService, LoggingService, HttpExceptionFilter],
