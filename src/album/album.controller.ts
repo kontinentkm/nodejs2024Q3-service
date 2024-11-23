@@ -13,13 +13,16 @@ import {
   NotFoundException,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { isUUID } from 'class-validator';
 import { LoggingService } from '../logging/logging/logging.service';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('album')
+@UseGuards(AuthGuard)
 export class AlbumController {
   constructor(
     private readonly albumService: AlbumService,

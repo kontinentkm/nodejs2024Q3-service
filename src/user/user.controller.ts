@@ -13,7 +13,7 @@ import {
   ValidationPipe,
   BadRequestException,
   NotFoundException,
-  UseGuards, // Импорт UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,10 +21,10 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { LoggingService } from '../logging/logging/logging.service';
 import { isUUID } from 'class-validator';
-import { AuthGuard } from '../auth/auth.guard'; // Импорт AuthGuard
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('user')
-@UseGuards(AuthGuard) // Применяем AuthGuard ко всем маршрутам контроллера
+@UseGuards(AuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(
