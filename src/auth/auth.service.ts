@@ -21,16 +21,14 @@ export class AuthService {
   async login(login: string, password: string): Promise<any> {
     const user = await this.userService.getUserByLogin(login);
     if (!user) {
-      throw new Error('User not found');
+      throw new UnauthorizedException('User not found');
     }
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      throw new Error('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials');
     }
-
     const accessToken = this.generateAccessToken(user);
     const refreshToken = this.generateRefreshToken(user);
-
     return { accessToken, refreshToken };
   }
 

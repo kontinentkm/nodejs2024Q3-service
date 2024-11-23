@@ -7,20 +7,19 @@ import { UserModule } from '../user/user.module';
 import { UserService } from '../user/user.service'; // Зависимость от модуля пользователя
 import { PassportModule } from '@nestjs/passport';
 import { PrismaModule } from '../../prisma/prisma.module';
-import { AuthGuard } from './auth.guard';
 
 @Module({
   imports: [
     UserModule,
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     PrismaModule,
-    AuthGuard,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '15m' },
     }),
   ],
-  providers: [AuthService, UserService, AuthGuard],
+  providers: [AuthService, UserService],
   controllers: [AuthController],
+  exports: [JwtModule, AuthService],
 })
 export class AuthModule {}
