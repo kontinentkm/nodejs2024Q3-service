@@ -38,13 +38,18 @@ export class UserService {
       throw new BadRequestException('Missing required data');
     }
 
-    // Хешируем пароль перед сохранением
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const existingUser = await this.prisma.user.findFirst({
+      where: { login: createUserDto.login },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('User with this login already exists');
+    }
 
     return this.prisma.user.create({
       data: {
         login: createUserDto.login,
-        password: hashedPassword, // Сохраняем хешированный пароль
+        password: createUserDto.password,
         version: 1,
         createdAt: new Date(),
         updatedAt: new Date(),

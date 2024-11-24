@@ -14,18 +14,21 @@ export class AuthService {
   // Регистрация нового пользователя
   async signup(login: string, password: string): Promise<User> {
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Auth.Hashed Password:', hashedPassword); // Логируем хэш пароля
     return this.userService.createUser({ login, password: hashedPassword });
   }
 
   // Авторизация пользователя
   async login(login: string, password: string): Promise<any> {
     const user = await this.userService.getUserByLogin(login);
+    console.log('Auth.Stored password in DB:', user.password); // Пароль из базы данных
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
     const passwordMatch = await bcrypt.compare(password, user.password);
+    console.log('Auth.Password match:', passwordMatch);
     if (!passwordMatch) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Auth.Invalid credentials');
     }
     const accessToken = this.generateAccessToken(user);
     const refreshToken = this.generateRefreshToken(user);
