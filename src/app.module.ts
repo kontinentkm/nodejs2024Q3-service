@@ -10,6 +10,11 @@ import { TrackModule } from './track/track.module';
 import { AlbumModule } from './album/album.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { PrismaService } from '../prisma/prisma.service';
+import { LoggingModule } from './logging/logging.module';
+import { LoggingService } from './logging/logging/logging.service';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { AuthModule } from './auth/auth.module';
+import { ProtectedModule } from './protected/protected.module';
 
 @Module({
   imports: [
@@ -26,7 +31,7 @@ import { PrismaService } from '../prisma/prisma.service';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: true, // Включите только для разработки!
+        synchronize: true,
       }),
       inject: [ConfigService],
     }),
@@ -35,8 +40,12 @@ import { PrismaService } from '../prisma/prisma.service';
     TrackModule,
     AlbumModule,
     FavoritesModule,
+    LoggingModule,
+    AuthModule,
+    ProtectedModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService, PrismaService, LoggingService, HttpExceptionFilter],
+  exports: [LoggingService, HttpExceptionFilter],
 })
 export class AppModule {}

@@ -11,13 +11,16 @@ import {
   BadRequestException,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { TrackService } from '../track/track.service';
 import { AlbumService } from '../album/album.service';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('artist')
+@UseGuards(AuthGuard)
 export class ArtistController {
   constructor(
     private readonly artistService: ArtistService,

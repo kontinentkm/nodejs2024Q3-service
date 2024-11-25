@@ -8,11 +8,14 @@ import {
   Body,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
-import { CreateFavoriteDto } from './dto/create-favorite.dto'; // DTO для обработки входных данных
+import { CreateFavoriteDto } from './dto/create-favorite.dto';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('favs')
+@UseGuards(AuthGuard)
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
