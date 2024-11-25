@@ -46,7 +46,7 @@ export class UserService {
       throw new BadRequestException('User with this login already exists');
     }
 
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         login: createUserDto.login,
         password: createUserDto.password,
@@ -55,6 +55,8 @@ export class UserService {
         updatedAt: new Date(),
       },
     });
+
+    return user;
   }
 
   async updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
@@ -97,31 +99,31 @@ export class UserService {
     await this.prisma.user.delete({ where: { id } });
   }
 
-  // Метод для входа пользователя
-  async login(login: string, password: string) {
-    // Используем findFirst, чтобы найти пользователя по login
-    const user = await this.prisma.user.findFirst({
-      where: {
-        login: login, // Используем поле 'login' для поиска
-      },
-    });
+  // // Метод для входа пользователя
+  // async login(login: string, password: string) {
+  //   // Используем findFirst, чтобы найти пользователя по login
+  //   const user = await this.prisma.user.findFirst({
+  //     where: {
+  //       login: login, // Используем поле 'login' для поиска
+  //     },
+  //   });
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+  //   if (!user) {
+  //     throw new NotFoundException('User not found');
+  //   }
 
-    // Сравниваем пароль с хешированным в базе
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new ForbiddenException('Invalid credentials');
-    }
+  //   // Сравниваем пароль с хешированным в базе
+  //   const isPasswordValid = await bcrypt.compare(password, user.password);
+  //   if (!isPasswordValid) {
+  //     throw new ForbiddenException('Invalid credentials');
+  //   }
 
-    // Генерация токенов
-    const accessToken = this.generateAccessToken(user);
-    const refreshToken = this.generateRefreshToken(user);
+  //   // Генерация токенов
+  //   const accessToken = this.generateAccessToken(user);
+  //   const refreshToken = this.generateRefreshToken(user);
 
-    return { accessToken, refreshToken };
-  }
+  //   return { accessToken, refreshToken };
+  // }
 
   // Метод для генерации access token
   private generateAccessToken(user: any) {

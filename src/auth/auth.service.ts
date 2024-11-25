@@ -32,7 +32,7 @@ export class AuthService {
     }
     const accessToken = this.generateAccessToken(user);
     const refreshToken = this.generateRefreshToken(user);
-    return { accessToken, refreshToken };
+    return { id: user.id, accessToken, refreshToken };
   }
 
   // Генерация Access Token
